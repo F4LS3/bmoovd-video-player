@@ -33,7 +33,7 @@ router.post('/play', (req: express.Request, res: express.Response) => {
         })
 });
 
-router.post('/time-pos', (req: express.Request, res: express.Response) => {
+router.get('/time-pos', (req: express.Request, res: express.Response) => {
     client.command(["get_property", "time-pos"])
         .then((data: any) => {
             logger.info(`Time-Pos: requestId: ${data.request_id}`);
