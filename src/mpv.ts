@@ -27,21 +27,14 @@ export class MPVClient extends EventEmitter {
     }
 
     private handleData(data: Buffer) {
-        let events = data.toString().trim().split('\n');
+        const json = JSON.parse(JSON.stringify(data));
 
-        for (let e of events) {
-            let event = JSON.parse(e);
+        logger.debug(JSON.stringify(json));
 
-            if(event.request_id) this.emit(event.request_id.toString(), event);
-            else this.emit('event', event);
-        }
-
-        // const json = JSON.parse(data);
-        //
-        // if(json.request_id)
-        //     this.emit(json.request_id.toString(), json);
-        // else
-        //     this.emit(json.event, json);
+        if(json.request_id)
+            this.emit(json?.request_id?.toString(), json);
+        else
+            this.emit(json?.event, json);
     }
 
     public command(args: any[]) {
