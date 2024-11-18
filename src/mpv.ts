@@ -28,7 +28,11 @@ export class MPVClient extends EventEmitter {
 
     private handleData(data: any) {
         const json = JSON.parse(data);
-        this.emit(json.request_id.toString(), json);
+
+        if(json.request_id)
+            this.emit(json.request_id.toString(), json);
+        else
+            this.emit(json.event, json);
     }
 
     public command(args: any[]) {
@@ -37,7 +41,9 @@ export class MPVClient extends EventEmitter {
 
             const command = JSON.stringify({command: args, request_id: this.requestId});
 
-            this.once(this.requestId.toString(), response => {
+            const eventName = args[0] === "loadfile" ? "start-file" : this.requestId.toString()
+
+            this.once(eventName, response => {
                 if(response.error !== "success") reject(new Error(`MPV Error: ${JSON.stringify(response)}`));
 
                 resolve(response);
