@@ -7,7 +7,7 @@ const router = express.Router();
 const client = new MPVClient('/tmp/testsocket');
 
 router.post('/loadfile', (req: express.Request, res: express.Response) => {
-    client.command(["loadfile", "/home/linus/test.mp4"])
+    client.command(["loadfile", "/home/linus/test.mp4", "append-play"])
         .then((data: any) => {
             logger.info(`LoadFile: requestId: ${data.request_id}`);
             logger.info(`LoadFile: data: ${data.data}`);
