@@ -26,13 +26,22 @@ export class MPVClient extends EventEmitter {
         this.client.on('data', data => this.handleData(data));
     }
 
-    private handleData(data: any) {
-        const json = JSON.parse(data);
+    private handleData(data: Buffer) {
+        let events = data.toString().trim().split('\n');
 
-        if(json.request_id)
-            this.emit(json.request_id.toString(), json);
-        else
-            this.emit(json.event, json);
+        for (let e of events) {
+            let event = JSON.parse(e);
+
+            if(event.request_id) this.emit(event.request_id.toString(), event);
+            else this.emit('event', event);
+        }
+
+        // const json = JSON.parse(data);
+        //
+        // if(json.request_id)
+        //     this.emit(json.request_id.toString(), json);
+        // else
+        //     this.emit(json.event, json);
     }
 
     public command(args: any[]) {
@@ -41,7 +50,7 @@ export class MPVClient extends EventEmitter {
 
             const command = JSON.stringify({command: args, request_id: this.requestId});
 
-            const eventName = args[0] === "loadfile" ? "start-file" : this.requestId.toString()
+            const eventName = args[0] === "loadfile" ? "event" : this.requestId.toString()
 
             this.once(eventName, response => {
                 if(response.error !== "success") reject(new Error(`MPV Error: ${JSON.stringify(response)}`));
