@@ -5,6 +5,8 @@ const router = express.Router();
 
 
 router.post('/loadfile', (req: express.Request, res: express.Response) => {
+    logger.info(JSON.stringify(req.body));
+
     const {player} = req.body;
 
     if(!player) {
