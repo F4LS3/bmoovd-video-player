@@ -26,7 +26,7 @@ export class MPVClient extends EventEmitter {
     }
 
     private handleData(data: Buffer) {
-        const json = JSON.parse(JSON.stringify(data.toString()))
+        const json = JSON.parse(data.toString());
 
         if(json?.event) return;
 
