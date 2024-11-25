@@ -1,4 +1,5 @@
 import winston, {transports} from "winston";
+import {MPVClient} from "./mpv";
 
 const errorFilter = winston.format((info, opts) => {
     return info.level === 'error' ? info : false;
@@ -20,3 +21,6 @@ export const logger = winston.createLogger({
         })
     ]
 });
+
+export const MPV_PLAYER_1 = new MPVClient('/tmp/SOCKET_SCREEN0');
+export const MPV_PLAYER_2 = new MPVClient('/tmp/SOCKET_SCREEN1');

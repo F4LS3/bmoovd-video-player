@@ -28,25 +28,21 @@ export class MPVClient extends EventEmitter {
     }
 
     private handleData(data: Buffer) {
-        // Füge die empfangenen Daten in den Puffer ein
         this.buffer += data.toString();
 
-        // Verarbeite Nachrichten, die durch \n abgeschlossen sind
         let newlineIndex;
         while ((newlineIndex = this.buffer.indexOf("\n")) !== -1) {
-            const message = this.buffer.slice(0, newlineIndex); // Extrahiere eine vollständige Nachricht
-            this.buffer = this.buffer.slice(newlineIndex + 1); // Entferne die verarbeitete Nachricht aus dem Puffer
+            const message = this.buffer.slice(0, newlineIndex);
+            this.buffer = this.buffer.slice(newlineIndex + 1);
 
             try {
                 const json = JSON.parse(message);
 
-                // Verarbeite Events separat
                 if (json.event) {
-                    this.emit("event", json); // Emit ein allgemeines Event
-                    continue; // Springe zur nächsten Nachricht
+                    this.emit("event", json);
+                    continue;
                 }
 
-                // Verarbeite Antworten auf spezifische Anfragen
                 if (json.request_id) {
                     this.emit(json.request_id.toString(), json);
                 }
