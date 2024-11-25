@@ -40,11 +40,14 @@ export class MPVClient extends EventEmitter {
             try {
                 const json = JSON.parse(message);
 
+                // Verarbeite Events separat
                 if (json.event) {
-                    // Wenn es ein Event ist, emitte es
-                    this.emit("event", json);
-                } else if (json.request_id) {
-                    // Wenn es eine Antwort auf eine Anfrage ist, emitte sie mit der request_id
+                    this.emit("event", json); // Emit ein allgemeines Event
+                    continue; // Springe zur nächsten Nachricht
+                }
+
+                // Verarbeite Antworten auf spezifische Anfragen
+                if (json.request_id) {
                     this.emit(json.request_id.toString(), json);
                 }
             } catch (err) {
@@ -53,21 +56,28 @@ export class MPVClient extends EventEmitter {
         }
     }
 
-    public command(args: any[]) {
+    public async command(args: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
-            if(this.requestId === Number.MAX_SAFE_INTEGER) this.requestId = 1;
+            if (this.requestId === Number.MAX_SAFE_INTEGER) this.requestId = 1;
 
-            const command = JSON.stringify({command: args, request_id: this.requestId});
-
-            const eventName = args[0] === "loadfile" ? "event" : this.requestId.toString()
-
-            this.once(eventName, response => {
-                if(response.error !== "success") reject(new Error(`MPV Error: ${JSON.stringify(response)}`));
-
-                resolve(response);
+            const command = JSON.stringify({
+                command: args,
+                request_id: this.requestId,
             });
 
-            this.client.write(command + '\n');
+            const requestId = this.requestId.toString();
+
+            // Ereignisbindung für die Antwort
+            this.once(requestId, (response) => {
+                if (response.error !== "success") {
+                    reject(new Error(`MPV Error: ${JSON.stringify(response)}`));
+                } else {
+                    resolve(response);
+                }
+            });
+
+            // Sende den Befehl
+            this.client.write(command + "\n");
             this.requestId++;
         });
     }
