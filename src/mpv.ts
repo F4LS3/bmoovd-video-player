@@ -5,7 +5,6 @@ import {logger} from "./helpers";
 export class MPVClient extends EventEmitter {
     private readonly socketPath: string;
     private client: Socket;
-
     private requestId: number;
 
     constructor(socketPath: string = '/tmp/mpvsocket') {
@@ -27,21 +26,11 @@ export class MPVClient extends EventEmitter {
     }
 
     private handleData(data: Buffer) {
-        let events = data.toString().trim().split('\n');
+        const json = JSON.parse(JSON.stringify(data.toString()))
 
-        for (let e of events) {
-            let event = JSON.parse(e);
+        if(json?.event) return;
 
-            if(event.request_id) this.emit(event.request_id.toString(), event);
-            else this.emit('event', event);
-        }
-
-        // const json = JSON.parse(data);
-        //
-        // if(json.request_id)
-        //     this.emit(json.request_id.toString(), json);
-        // else
-        //     this.emit(json.event, json);
+        this.emit(json.request_id.toString(), json);
     }
 
     public command(args: any[]) {
