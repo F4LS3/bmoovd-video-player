@@ -7,6 +7,8 @@ export class MPVClient extends EventEmitter {
     private client: Socket;
     private requestId: number;
 
+    private buffer: string = ""; // Puffer für unvollständige Nachrichten
+
     constructor(socketPath: string = '/tmp/mpvsocket') {
         super();
 
@@ -26,11 +28,29 @@ export class MPVClient extends EventEmitter {
     }
 
     private handleData(data: Buffer) {
-        const json = JSON.parse(data.toString());
+        // Füge die empfangenen Daten in den Puffer ein
+        this.buffer += data.toString();
 
-        if(json?.event) return;
+        // Verarbeite Nachrichten, die durch \n abgeschlossen sind
+        let newlineIndex;
+        while ((newlineIndex = this.buffer.indexOf("\n")) !== -1) {
+            const message = this.buffer.slice(0, newlineIndex); // Extrahiere eine vollständige Nachricht
+            this.buffer = this.buffer.slice(newlineIndex + 1); // Entferne die verarbeitete Nachricht aus dem Puffer
 
-        this.emit(json.request_id.toString(), json);
+            try {
+                const json = JSON.parse(message);
+
+                if (json.event) {
+                    // Wenn es ein Event ist, emitte es
+                    this.emit("event", json);
+                } else if (json.request_id) {
+                    // Wenn es eine Antwort auf eine Anfrage ist, emitte sie mit der request_id
+                    this.emit(json.request_id.toString(), json);
+                }
+            } catch (err) {
+                logger.error(`Failed to parse MPV IPC message: ${message}`);
+            }
+        }
     }
 
     public command(args: any[]) {
