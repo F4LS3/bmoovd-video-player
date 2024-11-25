@@ -125,4 +125,34 @@ router.get('/time-pos', (req: express.Request, res: express.Response) => {
     }
 });
 
+router.post('/stop', (req: express.Request, res: express.Response) => {
+    const {player} = req.body;
+
+    if(!player) {
+        res.status(400).send({ status: 400, message: 'Invalid player' });
+        return;
+    }
+
+    if(player !== 1 && player !== 2) {
+        res.status(400).send({ status: 400, message: 'Invalid player' });
+        return;
+    }
+
+    if(player === 1) {
+        MPV_PLAYER_1.command(["stop"])
+            .then((data: any) => {
+                logger.info(`Stop: requestId: ${data.request_id}`);
+                logger.info(`Stop: data: ${data.data}`);
+                res.status(200).send({ data: data.data });
+            })
+    } else {
+        MPV_PLAYER_2.command(["stop"])
+            .then((data: any) => {
+                logger.info(`Stop: requestId: ${data.request_id}`);
+                logger.info(`Stop: data: ${data.data}`);
+                res.status(200).send({ data: data.data });
+            })
+    }
+})
+
 export default router;
