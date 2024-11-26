@@ -24,3 +24,9 @@ export const logger = winston.createLogger({
 
 export const MPV_PLAYER_1 = new MPVClient('/tmp/SOCKET_SCREEN0');
 export const MPV_PLAYER_2 = new MPVClient('/tmp/SOCKET_SCREEN1');
+
+export enum WebhookEvent {
+    CREATE= "create",
+    DELETE = "delete",
+    UPDATE = "update",
+}
