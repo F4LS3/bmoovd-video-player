@@ -1,6 +1,15 @@
 import {logger} from "./helpers";
 import express from 'express';
 import mpv from "./routes/mpv";
+import {MPVClient} from "./mpv";
+
+declare global {
+    namespace Express {
+        interface Request {
+            player: MPVClient;
+        }
+    }
+}
 
 const app = express();
 
