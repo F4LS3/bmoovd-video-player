@@ -3,8 +3,6 @@ import {logger, MPV_PLAYER_1, MPV_PLAYER_2} from "../helpers";
 
 const router = express.Router();
 
-router.use(express.json());
-
 router.use((req, res, next) => {
     if(!req.body.player) {
         res.status(400).send({status: 400, message: 'Invalid player'});

@@ -17,6 +17,11 @@ app.disable('x-powered-by');
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+    logger.debug(`${req.method} ${req.originalUrl} | ${req.ip}`);
+    logger.debug(JSON.stringify(req.body));
+});
+
 app.use('/mpv', mpv);
 
 app.listen(8080, () => logger.info(`MPV-Rest live on port 8080`));
