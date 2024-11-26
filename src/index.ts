@@ -18,8 +18,10 @@ app.disable('x-powered-by');
 app.use(express.json());
 
 app.use((req, res, next) => {
-    logger.debug(`${req.method} ${req.originalUrl} | ${req.ip}`);
-    logger.debug(JSON.stringify(req.body));
+    logger.info(`${req.method} ${req.originalUrl} | ${req.ip}`);
+    logger.info(JSON.stringify(req.body));
+
+    next();
 });
 
 app.use('/mpv', mpv);
