@@ -4,7 +4,7 @@ import {logger} from "../helpers";
 const router = express.Router();
 
 router.post("/diashows", (req, res) => {
-    const event = req.headers['X-Appwrite-Webhook-Events'];
+    const event = req.headers['x-appwrite-webhook-events'];
 
     logger.info(event?.toString());
 
