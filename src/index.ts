@@ -2,6 +2,7 @@ import {logger} from "./helpers";
 import express from 'express';
 import mpv from "./routes/mpv";
 import {MPVClient} from "./mpv";
+import webhooks from "./routes/webhooks";
 
 declare global {
     namespace Express {
@@ -25,5 +26,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/mpv', mpv);
+app.use('/webhook/', webhooks);
 
 app.listen(8080, () => logger.info(`MPV-Rest live on port 8080`));
