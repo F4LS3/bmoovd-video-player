@@ -24,6 +24,8 @@ router.use((req, res, next) => {
 router.post('/loadfile', (req, res) => {
     const {video} = req.body;
 
+    logger.info(video);
+
     if(!video) return res.status(400).send({status: 400, message: 'Invalid video'});
     if(!existsSync(`${process.env.VIDEOS_DIR}/${video}`)) return res.status(400).send({status: 400, message: 'Invalid video'});
 
