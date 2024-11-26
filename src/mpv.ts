@@ -65,7 +65,7 @@ export class MPVClient extends EventEmitter {
 
             // Ereignisbindung für die Antwort
             this.once(requestId, (response) => {
-                if (response.error !== "success") {
+                if (response.error !== "success" && response.error !== "property unavailable") {
                     reject(new Error(`MPV Error: ${JSON.stringify(response)}`));
                 } else {
                     resolve(response);
