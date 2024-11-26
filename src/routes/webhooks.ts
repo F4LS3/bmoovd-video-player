@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/diashows", (req, res) => {
     const event = req.headers['x-appwrite-webhook-events'];
 
-    logger.info(event?.toString());
+    logger.info(event.includes("create"));
 
     res.status(204).send({});
 });
