@@ -7,7 +7,7 @@ export class MPVClient extends EventEmitter {
     private client: Socket;
     private requestId: number;
 
-    private buffer: string = ""; // Puffer für unvollständige Nachrichten
+    private buffer: string = "";
 
     constructor(socketPath: string = '/tmp/mpvsocket') {
         super();
@@ -63,7 +63,6 @@ export class MPVClient extends EventEmitter {
 
             const requestId = this.requestId.toString();
 
-            // Ereignisbindung für die Antwort
             this.once(requestId, (response) => {
                 if (response.error !== "success" && response.error !== "property unavailable") {
                     reject(new Error(`MPV Error: ${JSON.stringify(response)}`));
@@ -72,7 +71,6 @@ export class MPVClient extends EventEmitter {
                 }
             });
 
-            // Sende den Befehl
             this.client.write(command + "\n");
             this.requestId++;
         });

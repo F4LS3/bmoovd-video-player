@@ -20,7 +20,6 @@ app.use(express.json());
 
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.originalUrl} | ${req.ip}`);
-    logger.info(JSON.stringify(req.body));
 
     next();
 });

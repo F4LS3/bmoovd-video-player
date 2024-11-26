@@ -1,5 +1,6 @@
 import express from "express";
 import {logger, MPV_PLAYER_1, MPV_PLAYER_2} from "../helpers";
+import {existsSync} from 'fs';
 
 const router = express.Router();
 
@@ -19,8 +20,14 @@ router.use((req, res, next) => {
     next();
 });
 
-router.post('/loadfile', (req: express.Request, res: express.Response) => {
-    req.player.command(["loadfile", "/home/linus/test.mp4"])
+// @ts-ignore
+router.post('/loadfile', (req, res) => {
+    const {video} = req.body;
+
+    if(!video) return res.status(400).send({status: 400, message: 'Invalid video'});
+    if(!existsSync(`${process.env.VIDEO_DIR}/${video}`)) return res.status(400).send({status: 400, message: 'Invalid video'});
+
+    req.player.command(["loadfile", `${process.env.VIDEO_DIR}/${video}`])
         .then((data: any) => {
             logger.info(`LoadFile: requestId: ${data.request_id}`);
             logger.info(`LoadFile: data: ${data.data}`);
@@ -62,6 +69,6 @@ router.post('/stop', (req: express.Request, res: express.Response) => {
             logger.info(`Stop: data: ${data.data}`);
             res.status(200).send({ data: data.data });
         })
-})
+});
 
 export default router;
