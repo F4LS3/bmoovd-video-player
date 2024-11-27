@@ -65,12 +65,12 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
 
         // Input files with correct loop options
         imageFiles.forEach(image => {
-            command.inputOptions(['-loop 1', `-t ${timePerImage}`]).input(image);
+            command.input(image).inputOptions(['-loop 1', `-t ${timePerImage}`]);
         });
 
         command
             .videoCodec('h264_nvenc')
-            .outputOptions('-preset', 'p7', '-r', '30') // Set frame rate to 30 FPS
+            .outputOptions('-preset', 'p7')
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
             .on('start', commandLine => logger.info(`FFMPEG-Command executed: ${commandLine}`))
             .on('error', (err, stdout, stderr) => {
