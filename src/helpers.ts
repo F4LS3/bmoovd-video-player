@@ -80,7 +80,7 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
 
         command
             .complexFilter(filterComplex, 'outv')
-            .outputOptions('-preset', 'p7', '-crf', '23')
+            .outputOptions('-preset', 'p7')
             .videoCodec('h264_nvenc')
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
             .on('start', commandLine => logger.info(`FFMPEG-Command executed: ${commandLine}`))
