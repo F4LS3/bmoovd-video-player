@@ -42,7 +42,6 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
 
     const imageFiles = [];
 
-    // Download the images from Appwrite
     for (const imageFileId of imageFileIds) {
         const fileMetaData = await storage.getFile(process.env.APPWRITE_IMAGES_BUCKET_ID, imageFileId);
         const fileExt = path.extname(fileMetaData.name);
@@ -62,36 +61,16 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
     }
 
     await new Promise((resolve, reject) => {
-        const fadeFilters = [];
-        const overlayFilters = [];
-        let lastOutput = '[0:v]'; // Start with the first image as the base
-
-        imageFiles.forEach((_, index) => {
-            if (index > 0) {
-                const fadeInput = `[${index}:v]fade=d=1:t=in:alpha=1,setpts=PTS-STARTPTS+${index * timePerImage}/TB[f${index}]`;
-                fadeFilters.push(fadeInput);
-                const overlayInput = `${lastOutput}[f${index}]overlay[bg${index}]`;
-                overlayFilters.push(overlayInput);
-                lastOutput = `[bg${index}]`; // Update the last output
-            }
-        });
-
-        const finalFilter = [
-            ...fadeFilters,
-            ...overlayFilters,
-            `${lastOutput},format=yuv420p[v]`
-        ].join('; ');
-
         const command = ffmpeg();
 
+        // Input files with correct loop options
         imageFiles.forEach(image => {
             command.input(image).inputOptions(['-loop 1', `-t ${timePerImage}`]);
         });
 
         command
-            .complexFilter(finalFilter, 'v')
             .videoCodec('h264_nvenc')
-            .outputOptions('-preset', 'p7')
+            .outputOptions('-preset', 'p7', '-r', '30') // Set frame rate to 30 FPS
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
             .on('start', commandLine => logger.info(`FFMPEG-Command executed: ${commandLine}`))
             .on('error', (err, stdout, stderr) => {
@@ -108,10 +87,10 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
             .run();
     });
 
-    // Cleanup
     imageFiles.forEach(file => fs.unlinkSync(file));
     fs.rmdirSync(tempDir, { recursive: true });
 };
+
 
 
 export const MPV_PLAYER_1 = new MPVClient('/tmp/SOCKET_SCREEN0');
