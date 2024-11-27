@@ -68,14 +68,14 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
         const filterInputs = [];
         const fadeFilters = [];
         const overlayFilters = [];
-        let lastOverlay = '[0]'; // Startet mit dem ersten Bild ohne Fade
+        let lastOverlay = '[0]'; // Startet mit dem ersten Bild
 
         imageFiles.forEach((image, index) => {
             filterInputs.push(`-loop 1 -t ${timePerImage} -i ${image}`);
             if (index > 0) {
                 const fadeAlias = `[f${index - 1}]`;
                 fadeFilters.push(
-                    `[${index}]fade=d=1:t=in:alpha=1,setpts=PTS-STARTPTS+${index * (timePerImage - 1)}/TB${fadeAlias}`
+                    `[${index}]fade=d=1:t=in:alpha=1,setpts=PTS-STARTPTS+${index * timePerImage}/TB${fadeAlias}`
                 );
                 overlayFilters.push(
                     `${lastOverlay}${fadeAlias}overlay[bg${index}]`
@@ -84,7 +84,11 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
             }
         });
 
-        const finalFilter = fadeFilters.join('; ') + '; ' + overlayFilters.join('; ') + `,format=yuv420p[v]`;
+        const finalFilter =
+            fadeFilters.join('; ') +
+            '; ' +
+            overlayFilters.join('; ') +
+            ',format=yuv420p[v]';
 
         const command = ffmpeg();
 
