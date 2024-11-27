@@ -83,7 +83,10 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
         ].join('; ');
 
         const command = ffmpeg();
-        imageFiles.forEach(image => command.input(image).inputOptions('-loop 1', `-t ${timePerImage}`));
+
+        imageFiles.forEach(image => {
+            command.input(image).inputOptions(['-loop 1', `-t ${timePerImage}`]);
+        });
 
         command
             .complexFilter(finalFilter, 'v')
