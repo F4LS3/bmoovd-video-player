@@ -100,7 +100,7 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
     });
 
     imageFiles.forEach(file => fs.unlinkSync(file));
-    fs.rmdirSync(tempDir, { recursive: true });
+    fs.rmSync(tempDir, { recursive: true, force: true });
 };
 
 export const MPV_PLAYER_1 = new MPVClient('/tmp/SOCKET_SCREEN0');

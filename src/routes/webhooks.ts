@@ -1,5 +1,5 @@
 import express from "express";
-import {createDiashow, DiashowStatus, logger, MPV_PLAYER_1, MPV_PLAYER_2, WebhookEvent} from "../helpers";
+import {createDiashow, databases, DiashowStatus, logger, MPV_PLAYER_1, MPV_PLAYER_2, WebhookEvent} from "../helpers";
 import {rmSync} from 'fs';
 
 const router = express.Router();
@@ -56,7 +56,10 @@ router.post('/mpv', (req, res) => {
                     if(diashowId === null) return;
 
                     player.command(["loadfile", `${process.env.VIDEOS_DIR}/${diashowId}.mp4`])
-                        .then(() => logger.info(`Now playing ${diashowId}.mp4 on ${playerId}`))
+                        .then(async () => {
+                            await databases.updateDocument(process.env.APPWRITE_DATABASE_ID, process.env.APPWRITE_DIASHOWS_COLLECTION_ID, diashowId, { status: DiashowStatus.ACTIVE });
+                            logger.info(`Now playing ${diashowId}.mp4 on ${playerId}`);
+                        })
                         .catch(err => logger.error(err));
                 })
                 .catch(err => logger.error(err));
