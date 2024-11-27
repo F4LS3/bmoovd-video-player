@@ -65,7 +65,7 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
 
         // Input files with correct loop options
         imageFiles.forEach(image => {
-            command.input(image).inputOptions(['-loop 1', `-t ${timePerImage}`]);
+            command.input(image).inputOptions(['-loop 1', `-t 3`]);
         });
 
         command
