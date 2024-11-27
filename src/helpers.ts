@@ -54,13 +54,13 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
 
         await new Promise((resolve, reject) => {
             storage.getFileDownload(process.env.APPWRITE_IMAGES_BUCKET_ID, imageFileId)
-                .then((response: any) => {
-                    response.pipe(writeStream)
-                        .on('finish', () => {
-                            imageFiles.push(filePath);
-                            resolve(null);
-                        })
-                        .on('error', reject);
+                .then(response => {
+                    fs.writeFile(filePath, Buffer.from(response), err => {
+                        if(err) return reject(err);
+
+                        imageFiles.push(filePath);
+                        resolve(null);
+                    });
                 })
                 .catch(logger.error);
         });
