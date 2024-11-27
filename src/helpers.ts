@@ -62,7 +62,7 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
                         resolve(null);
                     });
                 })
-                .catch(logger.error);
+                .catch((err) => logger.error(err));
         });
     }
 
@@ -84,7 +84,7 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
             .videoCodec('h264_nvenc')
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
             .on('start', commandLine => logger.info(`FFMPEG-Command executed: ${commandLine}`))
-            .on('error', logger.error)
+            .on('error', err => logger.error(err))
             .on('error', reject)
             .on('end', async () => {
                 await databases.updateDocument(process.env.APPWRITE_DATABASE_ID, process.env.APPWRITE_DIASHOWS_COLLECTION_ID, diashowId, { status: DiashowStatus.READY });
