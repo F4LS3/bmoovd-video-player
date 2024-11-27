@@ -95,7 +95,7 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
         imageFiles.forEach(image => command.input(image));
 
         command
-            .complexFilter(finalFilter, 'outv')
+            .complexFilter(finalFilter, 'v')
             .outputOptions('-preset', 'p7')
             .videoCodec('h264_nvenc')
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
