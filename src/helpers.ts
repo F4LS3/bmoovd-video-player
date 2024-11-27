@@ -65,19 +65,33 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
     }
 
     await new Promise(async (resolve, reject) => {
-        const filterComplex = imageFiles
-                .map((image, index) => {
-                    return `[${index}:v]loop=${timePerImage * 25}:1:0,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS[v${index}]`;
-                })
-                .join('; ') +
-            `; ${imageFiles.map((_, index) => `[v${index}]`).join('')}concat=n=${imageFiles.length}:v=1:a=0[outv]`;
+        const filterInputs = [];
+        const fadeFilters = [];
+        const overlayFilters = [];
+        let lastOverlay = '[0]'; // Startet mit dem ersten Bild ohne Fade
+
+        imageFiles.forEach((image, index) => {
+            filterInputs.push(`-loop 1 -t ${timePerImage} -i ${image}`);
+            if (index > 0) {
+                const fadeAlias = `[f${index - 1}]`;
+                fadeFilters.push(
+                    `[${index}]fade=d=1:t=in:alpha=1,setpts=PTS-STARTPTS+${index * (timePerImage - 1)}/TB${fadeAlias}`
+                );
+                overlayFilters.push(
+                    `${lastOverlay}${fadeAlias}overlay[bg${index}]`
+                );
+                lastOverlay = `[bg${index}]`;
+            }
+        });
+
+        const finalFilter = fadeFilters.join('; ') + '; ' + overlayFilters.join('; ') + `,format=yuv420p[v]`;
 
         const command = ffmpeg();
 
         imageFiles.forEach(image => command.input(image));
 
         command
-            .complexFilter(filterComplex, 'outv')
+            .complexFilter(finalFilter, 'outv')
             .outputOptions('-preset', 'p7')
             .videoCodec('h264_nvenc')
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
