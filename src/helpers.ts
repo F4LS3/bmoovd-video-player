@@ -29,7 +29,7 @@ export const logger = winston.createLogger({
 export const client = new Client()
     .setEndpoint(process.env.APPWRITE_ENDPOINT)
     .setProject(process.env.APPWRITE_PROJECT_ID)
-    .setJWT(process.env.APPWRITE_TOKEN);
+    .setKey(process.env.APPWRITE_TOKEN);
 
 export const storage = new Storage(client);
 export const databases = new Databases(client);
