@@ -63,14 +63,24 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
     await new Promise((resolve, reject) => {
         const command = ffmpeg();
 
-        // Input files with correct loop options
         imageFiles.forEach(image => {
-            command.input(image).inputOptions(['-loop 1', `-t 3`]);
+            command.input(image);
         });
 
+        const filter = imageFiles
+            .map((_, index) => `[${index}:v]loop=${timePerImage * 25}:1:0,setpts=PTS-STARTPTS+${index * timePerImage}/TB[loop${index}]`) // 25 FPS
+            .join('; ');
+
+        const concatFilter = imageFiles
+            .map((_, index) => `[loop${index}]`)
+            .join('') + `concat=n=${imageFiles.length}:v=1:a=0[outv]`;
+
+        const finalFilter = `${filter}; ${concatFilter}`;
+
         command
+            .complexFilter(finalFilter, 'outv')
             .videoCodec('h264_nvenc')
-            .outputOptions('-preset', 'p7')
+            .outputOptions('-preset', 'p7', '-r', '25') // 25 FPS
             .output(`${process.env.VIDEOS_DIR}/${diashowId}.mp4`)
             .on('start', commandLine => logger.info(`FFMPEG-Command executed: ${commandLine}`))
             .on('error', (err, stdout, stderr) => {
