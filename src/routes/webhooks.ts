@@ -53,6 +53,8 @@ router.post('/mpv', (req, res) => {
                 .then(() => {
                     logger.info(`Stopped playback for player ${playerId}`);
 
+                    if(diashowId === null) return;
+
                     player.command(["loadfile", `${process.env.VIDEOS_DIR}/${diashowId}.mp4`])
                         .then(() => logger.info(`Now playing ${diashowId}.mp4 on ${playerId}`))
                         .catch(err => logger.error(err));
