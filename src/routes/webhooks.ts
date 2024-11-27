@@ -1,5 +1,6 @@
 import express from "express";
-import {logger, WebhookEvent} from "../helpers";
+import {createDiashow, DiashowStatus, logger, WebhookEvent} from "../helpers";
+import {rmSync} from 'fs';
 
 const router = express.Router();
 
@@ -22,18 +23,29 @@ router.use((req, res, next) => {
 });
 
 router.post("/diashows", (req, res) => {
-    logger.info(JSON.stringify(req.body));
+    const {status, $id, imageIds, timePerImage}: {status: DiashowStatus, $id: string, imageIds: string[], timePerImage: number, diashowFileId: string} = req.body;
 
     switch (req.webhookEvent) {
         case WebhookEvent.CREATE:
+            if(status !== DiashowStatus.PENDING) break;
+
+            createDiashow({timePerImage, imageFileIds: imageIds, diashowId: $id})
+                .then(() => logger.info(`WebHook successfully built video file: ${$id}.mp4`))
+                .catch(logger.error);
+
             break;
         case WebhookEvent.DELETE:
-            break;
-        case WebhookEvent.UPDATE:
+            if(status !== DiashowStatus.READY) break;
+            rmSync(`${process.env.VIDEOS_DIR}/${$id}.mp4`);
             break;
     }
 
     res.status(204).send({});
+});
+
+router.post('/mpv', (req, res) => {
+    // TODO: Bei update von einem player document das entsprechende video mit der diashowId abspielen auf dem geänderten player
+    // TODO: Vorher den gewählten player stop befehl senden zum beenden des aktuellen videos
 });
 
 export default router;
