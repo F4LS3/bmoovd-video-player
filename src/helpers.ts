@@ -48,7 +48,7 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
         const fileName = fileMetaData.name.split(".");
         const fileExt = fileName[fileName.length - 1];
 
-        const filePath = path.join(tempDir, `${tempDir}/${imageFileId}.${fileExt}`);
+        const filePath = path.join(tempDir, `${imageFileId}.${fileExt}`);
 
         const writeStream = fs.createWriteStream(filePath);
 
