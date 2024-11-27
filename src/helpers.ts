@@ -63,12 +63,17 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
     await new Promise((resolve, reject) => {
         const command = ffmpeg();
 
+        // Füge alle Bilder als Inputs hinzu
         imageFiles.forEach(image => {
             command.input(image);
         });
 
+        // Berechne Frames pro Bild basierend auf der gewünschten Zeit (bei 25 FPS)
+        const framesPerImage = timePerImage * 25;
+
+        // Generiere den Filter-Complex
         const filter = imageFiles
-            .map((_, index) => `[${index}:v]loop=${timePerImage * 25}:1:0,setpts=PTS-STARTPTS+${index * timePerImage}/TB[loop${index}]`) // 25 FPS
+            .map((_, index) => `[${index}:v]loop=${framesPerImage}:1:0,setpts=PTS-STARTPTS[loop${index}]`)
             .join('; ');
 
         const concatFilter = imageFiles
@@ -100,8 +105,6 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
     imageFiles.forEach(file => fs.unlinkSync(file));
     fs.rmdirSync(tempDir, { recursive: true });
 };
-
-
 
 export const MPV_PLAYER_1 = new MPVClient('/tmp/SOCKET_SCREEN0');
 export const MPV_PLAYER_2 = new MPVClient('/tmp/SOCKET_SCREEN1');
