@@ -44,16 +44,19 @@ router.post("/diashows", (req, res) => {
 });
 
 router.post('/mpv', (req, res) => {
-    const {playerId, diashowId} = req.body;
+    const {playerId, diashowId, previousDiashowId} = req.body;
     const player = playerId === 1 ? MPV_PLAYER_1 : MPV_PLAYER_2;
 
     switch (req.webhookEvent) {
         case WebhookEvent.UPDATE:
             player.command(["stop"])
-                .then(() => {
+                .then(async () => {
                     logger.info(`Stopped playback for player ${playerId}`);
 
-                    if(diashowId === null) return;
+                    if(diashowId === null) {
+                        await databases.updateDocument(process.env.APPWRITE_DATABASE_ID, process.env.APPWRITE_DIASHOWS_COLLECTION_ID, previousDiashowId, { status: DiashowStatus.READY });
+                        return;
+                    }
 
                     player.command(["loadfile", `${process.env.VIDEOS_DIR}/${diashowId}.mp4`])
                         .then(async () => {
