@@ -68,12 +68,9 @@ export const createDiashow = async ({ timePerImage, imageFileIds, diashowId }: {
             command.input(image);
         });
 
-        // Berechne Frames pro Bild basierend auf der gewünschten Zeit (bei 25 FPS)
-        const framesPerImage = timePerImage * 25;
-
-        // Generiere den Filter-Complex
+        // Normalisiere Auflösung und Farbraum (1920x1080 als Beispiel)
         const filter = imageFiles
-            .map((_, index) => `[${index}:v]loop=${framesPerImage}:1:0,setpts=PTS-STARTPTS[loop${index}]`)
+            .map((_, index) => `[${index}:v]loop=${timePerImage * 25}:1:0,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p,setpts=PTS-STARTPTS[loop${index}]`)
             .join('; ');
 
         const concatFilter = imageFiles
