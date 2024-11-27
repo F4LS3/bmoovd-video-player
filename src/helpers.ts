@@ -5,7 +5,7 @@ import path from "path";
 import * as fs from "node:fs";
 import ffmpeg from 'fluent-ffmpeg';
 
-const errorFilter = winston.format((info, opts) => {
+const errorFilter = winston.format((info) => {
     return info.level === 'error' ? info : false;
 })
 
@@ -50,8 +50,6 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
 
         const filePath = path.join(tempDir, `${imageFileId}.${fileExt}`);
 
-        const writeStream = fs.createWriteStream(filePath);
-
         await new Promise((resolve, reject) => {
             storage.getFileDownload(process.env.APPWRITE_IMAGES_BUCKET_ID, imageFileId)
                 .then(response => {
@@ -69,7 +67,7 @@ export const createDiashow = async ({timePerImage, imageFileIds, diashowId}: {ti
     await new Promise(async (resolve, reject) => {
         const filterComplex = imageFiles
                 .map((image, index) => {
-                    return `[${index}:v]setpts=PTS-STARTPTS,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,trim=start=0:end=${timePerImage}[v${index}]`;
+                    return `[${index}:v]loop=${timePerImage * 25}:1:0,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS[v${index}]`;
                 })
                 .join('; ') +
             `; ${imageFiles.map((_, index) => `[v${index}]`).join('')}concat=n=${imageFiles.length}:v=1:a=0[outv]`;
